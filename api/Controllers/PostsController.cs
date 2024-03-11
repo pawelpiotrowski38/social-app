@@ -3,6 +3,7 @@ using api.Data;
 using api.Mappers;
 using Microsoft.EntityFrameworkCore;
 using api.Dtos.Post;
+using api.Models;
 
 namespace api.Controllers
 {
@@ -19,7 +20,7 @@ namespace api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var posts = await _context.Posts.ToListAsync();
+            var posts = await _context.Posts.Include(p => p.Comments).ToListAsync();
 
             var postsDto = posts.Select(p => p.ToPostDtoFromPost());
 
@@ -29,7 +30,7 @@ namespace api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            var post = await _context.Posts.Include(p => p.Comments).FirstOrDefaultAsync(p => p.Id == id);
 
             if (post == null)
             {
