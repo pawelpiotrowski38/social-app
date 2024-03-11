@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using api.Data;
 using api.Mappers;
-using Microsoft.EntityFrameworkCore;
 using api.Dtos.Post;
-using api.Models;
+using api.Interfaces;
 
 namespace api.Controllers
 {
@@ -12,15 +12,17 @@ namespace api.Controllers
     public class PostsController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public PostsController(AppDbContext context)
+        private readonly IPostsRepository _postsRepository;
+        public PostsController(AppDbContext context, IPostsRepository postsRepository)
         {
-            _context = context;   
+            _context = context;
+            _postsRepository = postsRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var posts = await _context.Posts.Include(p => p.Comments).ToListAsync();
+            var posts = await _postsRepository.GetAllAsync();
 
             var postsDto = posts.Select(p => p.ToPostDtoFromPost());
 
@@ -30,7 +32,7 @@ namespace api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var post = await _context.Posts.Include(p => p.Comments).FirstOrDefaultAsync(p => p.Id == id);
+            var post = await _postsRepository.GetByIdAsync(id);
 
             if (post == null)
             {
@@ -44,8 +46,7 @@ namespace api.Controllers
         public async Task<IActionResult> Create([FromBody] CreatePostDto postDto)
         {
             var postModel = postDto.ToPostFromCreatePostDto();
-            await _context.Posts.AddAsync(postModel);
-            await _context.SaveChangesAsync();
+            await _postsRepository.CreateAsync(postModel);
 
             return CreatedAtAction(nameof(GetById), new { id = postModel.Id }, postModel.ToPostDtoFromPost());
         }
@@ -53,16 +54,12 @@ namespace api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdatePostDto postDto)
         {
-            var postModel = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            var postModel = await _postsRepository.UpdateAsync(id, postDto);
 
             if (postModel == null)
             {
                 return NotFound();
             }
-
-            postModel.Content = postDto.Content;
-
-            await _context.SaveChangesAsync();
 
             return Ok(postModel.ToPostDtoFromPost());
         }
@@ -70,15 +67,12 @@ namespace api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var postModel = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            var postModel = await _postsRepository.DeleteAsync(id);
 
             if (postModel == null)
             {
                 return NotFound();
             }
-
-            _context.Posts.Remove(postModel);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
