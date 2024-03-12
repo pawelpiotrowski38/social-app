@@ -3,6 +3,7 @@ using api.Data;
 using api.Dtos.Comment;
 using api.Interfaces;
 using api.Models;
+using api.Helpers;
 
 namespace api.Repositories
 {
@@ -14,9 +15,28 @@ namespace api.Repositories
             _context = context;
         }
 
-        public async Task<List<Comment>> GetAllAsync()
+        public async Task<List<Comment>> GetAllAsync(QueryObject query)
         {
-            return await _context.Comments.ToListAsync();
+            var comments = _context.Comments.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if (query.SortBy.Equals("new"))
+                {
+                    comments = comments.OrderByDescending(c => c.CreatedAt);
+                }
+
+                if (query.SortBy.Equals("old"))
+                {
+                    comments = comments.OrderBy(c => c.CreatedAt);
+                }
+            }
+            else
+            {
+                comments = comments.OrderByDescending(c => c.CreatedAt);
+            }
+
+            return await comments.ToListAsync();
         }
 
         public async Task<Comment?> GetByIdAsync(int id)

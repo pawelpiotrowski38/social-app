@@ -3,6 +3,8 @@ using api.Data;
 using api.Interfaces;
 using api.Models;
 using api.Dtos.Post;
+using Microsoft.AspNetCore.Mvc;
+using api.Helpers;
 
 namespace api.Repositories
 {
@@ -14,9 +16,28 @@ namespace api.Repositories
             _context = context;
         }
 
-        public async Task<List<Post>> GetAllAsync()
+        public async Task<List<Post>> GetAllAsync(QueryObject query)
         {
-            return await _context.Posts.Include(p => p.Comments).ToListAsync();
+            var posts = _context.Posts.Include(p => p.Comments).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if (query.SortBy.Equals("new"))
+                {
+                    posts = posts.OrderByDescending(p => p.CreatedAt);
+                }
+
+                if (query.SortBy.Equals("old"))
+                {
+                    posts = posts.OrderBy(p => p.CreatedAt);
+                }
+            }
+            else
+            {
+                posts = posts.OrderByDescending(p => p.CreatedAt);
+            }
+
+            return await posts.ToListAsync();
         }
 
         public async Task<Post?> GetByIdAsync(int id)
