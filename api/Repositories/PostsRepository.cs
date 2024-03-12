@@ -37,7 +37,9 @@ namespace api.Repositories
                 posts = posts.OrderByDescending(p => p.CreatedAt);
             }
 
-            return await posts.ToListAsync();
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+
+            return await posts.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
 
         public async Task<Post?> GetByIdAsync(int id)

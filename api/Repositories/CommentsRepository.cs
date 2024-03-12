@@ -36,7 +36,9 @@ namespace api.Repositories
                 comments = comments.OrderByDescending(c => c.CreatedAt);
             }
 
-            return await comments.ToListAsync();
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+
+            return await comments.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
 
         public async Task<Comment?> GetByIdAsync(int id)
