@@ -22,15 +22,9 @@ namespace api.Repositories
 
             if (!string.IsNullOrWhiteSpace(query.SortBy))
             {
-                if (query.SortBy.Equals("new"))
-                {
-                    posts = posts.OrderByDescending(p => p.CreatedAt);
-                }
-
-                if (query.SortBy.Equals("old"))
-                {
-                    posts = posts.OrderBy(p => p.CreatedAt);
-                }
+                posts = query.SortBy.Equals("old")
+                    ? posts.OrderBy(p => p.CreatedAt)
+                    : posts.OrderByDescending(p => p.CreatedAt);
             }
             else
             {

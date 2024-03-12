@@ -21,15 +21,9 @@ namespace api.Repositories
 
             if (!string.IsNullOrWhiteSpace(query.SortBy))
             {
-                if (query.SortBy.Equals("new"))
-                {
-                    comments = comments.OrderByDescending(c => c.CreatedAt);
-                }
-
-                if (query.SortBy.Equals("old"))
-                {
-                    comments = comments.OrderBy(c => c.CreatedAt);
-                }
+                comments = query.SortBy.Equals("old")
+                    ? comments.OrderBy(c => c.CreatedAt)
+                    : comments.OrderByDescending(c => c.CreatedAt);
             }
             else
             {
