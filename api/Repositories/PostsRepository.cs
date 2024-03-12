@@ -61,5 +61,10 @@ namespace api.Repositories
 
             return existingPost;
         }
+
+        public async Task<bool> PostExists(int id)
+        {
+            return await _context.Posts.AnyAsync(p => p.Id == id);
+        }
     }
 }
