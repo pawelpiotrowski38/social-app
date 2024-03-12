@@ -15,5 +15,14 @@ namespace api.Mappers
                 PostId = commentModel.PostId,
             };
         }
+
+        public static Comment ToCommentFromCreateCommentDto(this CreateCommentDto commentDto, int postId)
+        {
+            return new Comment
+            {
+                Content = commentDto.Content,
+                PostId = postId,
+            };
+        }
     }
 }
