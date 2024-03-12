@@ -4,6 +4,7 @@ using api.Data;
 using api.Mappers;
 using api.Dtos.Post;
 using api.Interfaces;
+using api.Helpers;
 
 namespace api.Controllers
 {
@@ -20,9 +21,9 @@ namespace api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var posts = await _postsRepository.GetAllAsync();
+            var posts = await _postsRepository.GetAllAsync(query);
 
             var postsDto = posts.Select(p => p.ToPostDtoFromPost());
 

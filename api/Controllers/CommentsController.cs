@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using api.Interfaces;
 using api.Mappers;
 using api.Dtos.Comment;
+using api.Helpers;
 
 namespace api.Controllers
 {
@@ -18,9 +19,9 @@ namespace api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var comments = await _commentsRepository.GetAllAsync();
+            var comments = await _commentsRepository.GetAllAsync(query);
 
             var commentsDto = comments.Select(c => c.ToCommentDtoFromComment());
 
